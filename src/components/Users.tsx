@@ -3,7 +3,6 @@ import { useQueryClient, useQuery } from 'react-query';
 import axios from 'axios';
 import Image from 'next/image';
 
-import { FixedSizeList as List } from 'react-window';
 import { User } from './User';
 import type { UserType } from './User';
 
