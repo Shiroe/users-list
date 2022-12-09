@@ -19,18 +19,45 @@ type OrderBy = 'ASC' | 'DESC' | '';
 export const Users = ({ searchTerm = 'gar' }: UsersProps) => {
   const [selections, setSelections] = useState<number[]>([]);
   const [orderBy, setOrderBy] = useState<OrderBy>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState<number>(20);
+  const [loadedDataIndex, setLoadedDataIndex] = useState<number>(perPage - 1);
 
   const queryClient = useQueryClient();
-  const { isLoading, data, error } = useQuery(['users'], 
+  const { isLoading, data, error } = useQuery(['users', searchTerm], 
     () => fetcher('/api/users', { search: searchTerm }));
 
   useEffect(() => {
     setOrderBy('');
+    setLoadedDataIndex(perPage - 1)
 
     return () => {
       setOrderBy('');
     }
-  }, [searchTerm]);
+  }, [searchTerm, perPage]);
+
+  useEffect(() => {
+    const updateLoadedData = () => {
+      const currentPosition = window.scrollY;
+      const scrollHeight = document.body.scrollHeight - window.innerHeight;
+      
+      if (Math.abs(Math.ceil(scrollHeight) - Math.ceil(currentPosition)) <= 3) {
+        setLoadedDataIndex(loadedDataIndex + perPage);
+        window.scrollTo({ top: scrollHeight })
+      }
+      console.log('scrolled', scrollHeight, ' : ', currentPosition);
+    }
+
+    window.addEventListener('scroll', updateLoadedData);
+
+    return () => {
+      window.removeEventListener('scroll', updateLoadedData);
+    }
+  })
+
+  const getLoadedItems = (orderedData: UserType[]): UserType[] | [] => {
+    return orderedData.slice(0, loadedDataIndex);
+  }
 
   const getItemsOrdered = (): UserType[] | [] => {
     if (!data) return [];
@@ -138,39 +165,31 @@ export const Users = ({ searchTerm = 'gar' }: UsersProps) => {
           </div>
         </div>
       </div>
-      {/* <List
-        width={680}
-        height={64 * data.length}
-        itemSize={64}
-        itemCount={data.length}
-        itemData={data}
-      > */}
-        {getItemsOrdered().map((item: UserType) => (
-          <User
-            onSelect={onSelect} 
-            isSelected={isUserSelected(item.id)} 
-            user={item}
-            key={item.id}
-            editButton={
-              <button 
-                className='flex items-center justify-center w-12 h-6 py-0.5 text-gray-60 border-gray-30 border-2 rounded-sm mr-1 hover:text-gray-50 hover:border-gray-50'
-                onClick={() => alert(`Edit ${item.name} ?`)}
-              >
-                <EditIcon />
-                Edit
-              </button>
-            }
-            deleteButton={
-              <button 
-                className='flex items-center justify-center w-7 h-6 py-0.5 text-gray-60 border-gray-30 border-2 rounded-sm mr-1 hover:text-gray-50 hover:border-gray-50'
-                onClick={() => alert(`Delete ${item.name} ?`)}
-              >
-                <DeleteIcon />
-              </button>
-            }
-          />
-        ))}
-      {/* </List> */}
+      {getLoadedItems(getItemsOrdered()).map((item: UserType) => (
+        <User
+          onSelect={onSelect} 
+          isSelected={isUserSelected(item.id)} 
+          user={item}
+          key={item.id}
+          editButton={
+            <button 
+              className='flex items-center justify-center w-12 h-6 py-0.5 text-gray-60 border-gray-30 border-2 rounded-sm mr-1 hover:text-gray-50 hover:border-gray-50'
+              onClick={() => alert(`Edit ${item.name} ?`)}
+            >
+              <EditIcon />
+              Edit
+            </button>
+          }
+          deleteButton={
+            <button 
+              className='flex items-center justify-center w-7 h-6 py-0.5 text-gray-60 border-gray-30 border-2 rounded-sm mr-1 hover:text-gray-50 hover:border-gray-50'
+              onClick={() => alert(`Delete ${item.name} ?`)}
+            >
+              <DeleteIcon />
+            </button>
+          }
+        />
+      ))}
     </div>
   );
 }
