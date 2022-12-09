@@ -15,7 +15,7 @@ type UsersProps = {
 
 type OrderBy = 'ASC' | 'DESC' | '';
 
-export const Users = ({ searchTerm = 'gar' }: UsersProps) => {
+export const Users = ({ searchTerm = '' }: UsersProps) => {
   const [selections, setSelections] = useState<number[]>([]);
   const [orderBy, setOrderBy] = useState<OrderBy>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
