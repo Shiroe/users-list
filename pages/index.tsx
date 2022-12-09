@@ -23,7 +23,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className='h-full md:max-w-screen-md mx-auto px-8 py-8 text-base'>
+      <main className='h-full min-h-screen md:max-w-screen-md mx-auto px-8 py-8 text-base'>
         <SearchComponent
           className='flex justify-end'
           title={

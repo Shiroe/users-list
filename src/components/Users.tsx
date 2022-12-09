@@ -112,9 +112,29 @@ export const Users = ({ searchTerm = '' }: UsersProps) => {
   }
 
   //Handle the error state
-  if (error) return <div><>Failed to load {error}</></div>;
+  if (error) {
+    return (
+      <AlternateMessageContainer>
+        <>Failed to load {error}</>
+      </AlternateMessageContainer>
+    );
+  }
   //Handle the loading state
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <AlternateMessageContainer>
+        Loading...
+      </AlternateMessageContainer>
+    );
+  }
+
+  if (!data.length) {
+    return (
+      <AlternateMessageContainer>
+        No Users found with these search params.
+      </AlternateMessageContainer>
+    );
+  }
 
   return (
     <div className='bg-white p-3 rounded-md mt-4'>
@@ -189,6 +209,16 @@ export const Users = ({ searchTerm = '' }: UsersProps) => {
           }
         />
       ))}
+    </div>
+  );
+}
+
+const AlternateMessageContainer = ({ children }: any) => {
+  return (
+    <div className='bg-white p-3 rounded-md mt-4'>
+      <h3 className='text-lg text-gray-60'>
+        {children}
+      </h3>
     </div>
   );
 }
