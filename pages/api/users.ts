@@ -1,12 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import path from 'path';
 import { promises as fs } from 'fs';
-import type { User } from '../../src/components/User';
+import type { UserType } from '../../src/components/User';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<User[]>
+  res: NextApiResponse<UserType[]>
 ) {
   const { search = '' } = req.body;
   const jsonDirectory = path.join(process.cwd(), 'src/json');
@@ -14,7 +14,7 @@ export default async function handler(
 
   // consists of filter function in case we wanted to move search index to the backend
   const results = JSON.parse(fileContents).users
-    .filter((d: User) => { 
+    .filter((d: UserType) => { 
       return d.name.includes(search)
       || d.email.includes(search)
     });
