@@ -8,7 +8,10 @@ module.exports = {
   ],
   safelist: [
     {
-      pattern: /(bg|text)-(red|green|blue|purple|orange|pink|gray|brand)-(20|30|40|50|60|70|80|90|100)/,
+      pattern: /(bg|text|border)-(red|green|blue|purple|orange|pink|gray|brand)-(20|30|40|50|60|70|80|90|100)/,
+    },
+    {
+      pattern: /(border)-(x|y|l|b|t|r)-(0|2|4|8)/,
     },
   ],
   theme: {
@@ -19,6 +22,7 @@ module.exports = {
       xl: ['18px', '27px'],
     },
     backgroundColor: {
+      'white': '#FFFFFF',
       'gray-100': '#EDF2F7',
       'brand-50': '#413EEF',
       'purple-20': '#EFE2FE',
@@ -39,6 +43,7 @@ module.exports = {
       'gray-20': '#EDF2F7',
     },
     colors: {
+      'white': '#FFFFFF',
       'brand-50': '#413EEF',
       'purple-20': '#EFE2FE',
       'purple-80': '#574195',

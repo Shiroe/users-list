@@ -1,3 +1,9 @@
+const path = require('path');
+
+const aliases = {
+  src: path.resolve(__dirname, 'src'),
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -38,6 +44,10 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config) => {
+    config.resolve.alias = { ...config.resolve.alias, ...aliases }
+    return config;
+  }
 }
 
 module.exports = nextConfig
