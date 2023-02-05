@@ -1,19 +1,17 @@
 import Head from 'next/head'
 import { useState } from 'react';
-import { debounce, throttle } from 'lodash';
 
 import { Users } from '../src/components/Users';
 import { SearchComponent } from '../src/components/SearchComponent'
 
 export default function Home() {
-  const [searchTerm, setSearchTerm] = useState<string>();
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const onSearchChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     const { target: { value } } = ev;
     setSearchTerm(value);
   }
-  
-  const debouncedChange = throttle(onSearchChange, 150, { leading: true, trailing: true });
+
 
   return (
     <div className='bg-gray-20'>
@@ -34,9 +32,9 @@ export default function Home() {
           input={
             <input
               className='px-2 h-10 w-52 mr-3 rounded'
-              placeholder='Seach'
+              placeholder='Search'
               value={searchTerm}
-              onChange={debouncedChange}
+              onChange={onSearchChange}
             />
           }
           button={

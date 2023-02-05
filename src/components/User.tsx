@@ -74,7 +74,7 @@ export const User = ({ user, style, onSelect, isSelected = false, editButton, de
             />
           </div>
         )}
-        <div className='mx-2 w-52'>
+        <div className='mx-2 w-52 flex flex-col flex-wrap'>
           <span className='block text-base'>{user.name}</span>
           <span className='block text-base text-gray-60'>{user.email}</span>
         </div>

@@ -5,6 +5,9 @@ import Image from 'next/image';
 
 import { User } from './User';
 import type { UserType } from './User';
+import useDebounce from '../hooks/useDebounce';
+
+import ButtonWithIcon from './ButtonWithIcon';
 
 const fetcher = (url: string, params: object) =>
   axios.post(url, { ...params }).then((res) => res.data);
@@ -13,25 +16,30 @@ type UsersProps = {
   searchTerm?: string;
 }
 
-type OrderBy = 'ASC' | 'DESC' | '';
+type OrderBy = 'ASC' | 'DESC';
+type OrderByFields = 'role' | 'email' | 'name';
 
 export const Users = ({ searchTerm = '' }: UsersProps) => {
   const [selections, setSelections] = useState<number[]>([]);
-  const [orderBy, setOrderBy] = useState<OrderBy>('');
+  const [orderBy, setOrderBy] = useState<OrderBy>('ASC');
+  const [orderField, setOrderField] = useState<OrderByFields>('name');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [perPage, setPerPage] = useState<number>(20);
   const [loadedDataIndex, setLoadedDataIndex] = useState<number>(perPage - 1);
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 200)
+
   const queryClient = useQueryClient();
-  const { isLoading, data, error } = useQuery(['users', searchTerm], 
-    () => fetcher('/api/users', { search: searchTerm }));
+  const { isLoading, data, error } = useQuery(['users', debouncedSearchTerm], 
+    () => fetcher('/api/users', { search: debouncedSearchTerm }));
+
 
   useEffect(() => {
-    setOrderBy('');
+    setOrderBy('ASC');
     setLoadedDataIndex(perPage - 1)
 
     return () => {
-      setOrderBy('');
+      setOrderBy('ASC');
     }
   }, [searchTerm, perPage]);
 
@@ -62,20 +70,18 @@ export const Users = ({ searchTerm = '' }: UsersProps) => {
     if (!data) return [];
 
     if (orderBy === 'ASC') {
-      return data.sort((a: UserType, b: UserType) => a.role.localeCompare(b.role))
+      return data.sort((a: UserType, b: UserType) => a[orderField].localeCompare(b[orderField]))
     }
 
     if (orderBy === 'DESC') {
-      return (data.sort((a: UserType, b: UserType) => a.role.localeCompare(b.role)))?.reverse();
+      return (data.sort((a: UserType, b: UserType) => a[orderField].localeCompare(b[orderField])))?.reverse();
     }
 
     return data;
   }
 
-  const onOrderBy = () => {
-    if (orderBy === '') {
-      setOrderBy('ASC');
-    }
+  const onOrderBy = (field: OrderByFields) => {
+    setOrderField(field);
 
     if (orderBy === 'ASC') {
       setOrderBy('DESC');
@@ -146,32 +152,50 @@ export const Users = ({ searchTerm = '' }: UsersProps) => {
             ) : null
           }
         </div>
-        <button className='flex content-center px-2 py-1 text-gray-60 border-gray-30 border-2 rounded-sm mr-1 hover:text-gray-80 hover:border-gray-50'
+        <ButtonWithIcon
+          className='flex content-center px-2 py-1 text-gray-60 border-gray-30 border-2 rounded-sm mr-1 hover:text-gray-80 hover:border-gray-50'
           onClick={() => selections.length ? alert(`Edit ${selections.length} Users?`) : null}
-        >
-          <EditIcon />
-          Edit
-        </button>
-        <button
+          btnType='edit'
+          label='Edit'
+        />
+        <ButtonWithIcon
           className='flex content-center px-2 py-1 text-gray-60 border-gray-30 border-2 rounded-sm hover:text-gray-80 hover:border-gray-50'
           onClick={() => selections.length ? alert(`Delete ${selections.length} Users?`) : null}
-        >
-          <DeleteIcon />
-          Delete
-        </button>
+          btnType='delete'
+          label='Delete'
+        />
       </div>
       <div className='w-full flex p-2 rounded-md justify-start'>
         <div className='w-72 flex self-end'>
           <input className='mx-2 w-3 hover:cursor-pointer' type={'checkbox'} onChange={onSelectAll} />
-          <div className='mx-2 text-sm text-gray-60 w-full'>User</div>
+          <div className='flex mx-2 text-sm text-gray-60 w-full'>
+            <span
+              onClick={() => onOrderBy('name')}
+              className='cursor-pointer'
+            >
+              User
+            </span>
+            {orderField === 'name'?
+              (<Image
+                className='object-contain mx-1'
+                alt='ordering icon'
+                width={18}
+                height={18}
+                src={orderBy === 'ASC' ? '/assets/arrow-up.svg' : '/assets/arrow-down.svg'}
+              />) 
+              : null
+            }
+          </div>
         </div>
         <div className='flex self-end px-2'>
-          <div
-            className='flex mx-2 text-sm text-gray-60 w-full cursor-pointer'
-            onClick={onOrderBy}
-          >
-            Permission 
-            {orderBy !== ''?
+          <div className='flex mx-2 text-sm text-gray-60 w-full cursor-pointer'>
+            <span
+              className='cursor-pointer'
+              onClick={() => onOrderBy('role')}
+            >
+              Permission 
+            </span>
+            {orderField === 'role'?
               (<Image
                 className='object-contain mx-1'
                 alt='ordering icon'
@@ -191,21 +215,18 @@ export const Users = ({ searchTerm = '' }: UsersProps) => {
           user={item}
           key={item.id}
           editButton={
-            <button 
+            <ButtonWithIcon 
               className='flex items-center justify-center w-12 h-6 py-0.5 text-gray-60 border-gray-30 border-2 rounded-sm mr-1 hover:text-gray-50 hover:border-gray-50'
               onClick={() => alert(`Edit ${item.name} ?`)}
-            >
-              <EditIcon />
-              Edit
-            </button>
+              btnType='edit'
+            />
           }
           deleteButton={
-            <button 
+            <ButtonWithIcon 
               className='flex items-center justify-center w-7 h-6 py-0.5 text-gray-60 border-gray-30 border-2 rounded-sm mr-1 hover:text-gray-50 hover:border-gray-50'
               onClick={() => alert(`Delete ${item.name} ?`)}
-            >
-              <DeleteIcon />
-            </button>
+              btnType='delete'
+            />
           }
         />
       ))}
@@ -223,22 +244,4 @@ const AlternateMessageContainer = ({ children }: any) => {
   );
 }
 
-const EditIcon = () => {
-  return  <Image
-    className='object-contain mr-1'
-    alt='edit icon'
-    width={18}
-    height={18}
-    src={'/assets/edit.svg'}
-  />
-}
 
-const DeleteIcon = () => {
-  return  <Image
-    className='object-contain mr-1'
-    alt='remove icon'
-    width={18}
-    height={18}
-    src={'/assets/trash.svg'}
-  />
-}
